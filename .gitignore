@@ -28,3 +28,5 @@ output*
 project-words.txt
 .venv
 test_result.txt
+seed-compiled/
+seed-compiled/*
