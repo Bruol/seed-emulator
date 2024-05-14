@@ -36,7 +36,7 @@ client = docker.from_env()
 
 def get_asns():
     asns = []
-    with open("/home/ubuntu/bt/bwtester_stress_test/asns","r") as f:
+    with open("/home/ubuntu/bt/seed-emulator/bwtester_stress_test/asns","r") as f:
         asns_str = f.read()
 
     asns = asns_str.split(",")
@@ -85,7 +85,7 @@ def oneToOne(f, src_asn, dst_asn):
     print(f"Running One To One Test on {str(f)}")
     f(src_asn, dst_asn)
 
-bwtest = TestFunction(runBWClient, "bwtester", parameter_str="3,?,?,1Gbps")
+bwtest = TestFunction(runBWClient, "bwtester", parameter_str="30,?,?,100Mbps")
 
 oneToOne(bwtest, 110, 120)
 

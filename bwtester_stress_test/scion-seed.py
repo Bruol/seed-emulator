@@ -7,7 +7,7 @@ from seedemu.layers.Scion import LinkType as ScLinkType
 from seedemu.services import ScionBwtestService
 import os
 
-BASE_LOG_DIR = "/home/ubuntu/bt/bwtester_stress_test/logs"
+BASE_LOG_DIR = "/home/ubuntu/bt/seed-emulator/bwtester_stress_test/logs"
 
 
 # Initialize
