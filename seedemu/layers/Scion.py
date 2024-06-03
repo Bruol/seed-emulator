@@ -97,6 +97,14 @@ class Scion(Layer, Graphable):
 
         return self
 
+    def getXcLinks(self) -> Dict[Tuple[IA, IA, str, str, LinkType], int]:
+        """!
+        @brief Get all cross-connect links.
+
+        @returns Dictionary of cross-connect links.
+        """
+        return self.__links
+
     def addIxLink(self, ix: int, a: Union[IA, Tuple[int, int]], b: Union[IA, Tuple[int, int]],
                   linkType: LinkType, count: int=1, a_router: str="", b_router: str="") -> 'Scion':
         """!
@@ -122,6 +130,14 @@ class Scion(Layer, Graphable):
         self.__ix_links[(ix, a, b, a_router, b_router, linkType)] = count
 
         return self
+
+    def getIxLinks(self) -> Dict[Tuple[int, IA, IA, str, str, LinkType], int]:
+        """!
+        @brief Get all IX links.
+
+        @returns Dictionary of IX links.
+        """
+        return self.__ix_links
 
     def configure(self, emulator: Emulator) -> None:
         reg = emulator.getRegistry()
@@ -255,8 +271,8 @@ class Scion(Layer, Graphable):
                 except AssertionError:
                     assert False, f"cannot find router {b_router} in as{b}"
 
-            a_ifaddr, a_net, _ = a_router.getCrossConnect(b.asn, b_router.getName())
-            b_ifaddr, b_net, _ = b_router.getCrossConnect(a.asn, a_router.getName())
+            a_ifaddr, a_net = a_router.getCrossConnect(b.asn, b_router.getName())
+            b_ifaddr, b_net = b_router.getCrossConnect(a.asn, a_router.getName())
             assert a_net == b_net
             net = reg.get('xc', 'net', a_net)
             a_addr = str(a_ifaddr.ip)

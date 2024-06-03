@@ -271,7 +271,8 @@ class ScionRouting(Routing):
         xcs = this_br.getCrossConnects()
 
         for xc in xcs:  
-            (xc_if,_,linkprops) = xcs[xc]
+            (xc_if,_) = xcs[xc]
+            linkprops = this_br.getCrossConnectProperties(*xc)
             if if_addr == str(xc_if.ip):
                 return linkprops
                     
