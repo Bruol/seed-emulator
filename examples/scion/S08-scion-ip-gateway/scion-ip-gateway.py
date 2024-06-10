@@ -115,5 +115,5 @@ emu.addLayer(sig)
 emu.render()
 
 # Compilation
-emu.compile(Docker(internetMapEnabled=True), '../seed-compiled', override=True)
-emu.compile(Graphviz(), '../seed-compiled/graphviz', override=True)
+emu.compile(Docker(internetMapEnabled=True), './output', override=True)
+emu.compile(Graphviz(), './output/graphviz', override=True)

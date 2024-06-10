@@ -51,5 +51,5 @@ Here we also see an example of having to set the ports in the sig config if ther
 At the end we should not forget to add the sig layer to the emulator
 
 ```python
-emu.addService(sig)
+emu.addLayer(sig)
 ```
