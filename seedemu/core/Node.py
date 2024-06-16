@@ -536,7 +536,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
         @param address address to use on the interface in CIDR notation. Must
         be within the same subnet.
         @param latency latency the cross connect network will have
-        @param bandwidth bandwidth the cross connect network will have
+        @param bandwidth bandwidth the cross connect network will have in bps
         @param packetDrop packet drop the cross connect network will have
 
         @returns self, for chaining API calls.

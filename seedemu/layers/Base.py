@@ -26,7 +26,7 @@ ip -j addr | jq -cr '.[]' | while read -r iface; do {
             ip li set "$ifname" down
             ip li set "$ifname" name "$new_ifname"
             ip li set "$new_ifname" up
-            tc qdisc add dev "$new_ifname" root handle 1:0 tbf rate "${bw}bit" buffer 1000000 limit 1000
+            tc qdisc add dev "$new_ifname" root handle 1:0 tbf rate "${bw}bit" buffer BUFFER_SIZE limit QUEUE_SIZE
             tc qdisc add dev "$new_ifname" parent 1:0 handle 10: netem delay "${latency}ms" loss "${loss}%"
         }
     }; done
@@ -41,6 +41,9 @@ class Base(Layer, Graphable):
     __ases: Dict[int, AutonomousSystem]
     __ixes: Dict[int, InternetExchange]
 
+    __buffer_size: int = 1000000
+    __queue_size: int = 1000
+            
     __name_servers: List[str]
 
     def __init__(self):
@@ -84,7 +87,7 @@ class Base(Layer, Graphable):
                 ifinfo += '{}:{}:{}:{}:{}\n'.format(net.getName(), net.getPrefix(), l, b, d)
 
             node.setFile('/ifinfo.txt', ifinfo)
-            node.setFile('/interface_setup', BaseFileTemplates['interface_setup_script'])
+            node.setFile('/interface_setup', BaseFileTemplates['interface_setup_script'].replace("BUFFER_SIZE", str(self.__buffer_size)).replace("QUEUE_SIZE", str(self.__queue_size)))
             node.insertStartCommand(0, '/interface_setup')
             node.insertStartCommand(0, 'chmod +x /interface_setup')
 
@@ -208,6 +211,44 @@ class Base(Layer, Graphable):
         _as = self.__ases[asn]
         node = _as.getHost(name)
         return node
+
+    def setTCQueueSize(self, queue_size: int) -> Base:
+        """!
+        @brief Set the queue size for TC.
+
+        @param queue_size queue size. in num packets
+        @returns self, for chaining API calls.
+        """
+        self.__queue_size = queue_size
+
+        return self
+
+    def getTCQueueSize(self) -> int:
+        """!
+        @brief Get the queue size for TC.
+
+        @returns queue size. in num packets
+        """
+        return self.__queue_size
+    
+    def setTCBufferSize(self, buffer_size: int) -> Base:
+        """!
+        @brief Set the buffer size for TC.
+
+        @param buffer_size buffer size. in bytes
+        @returns self, for chaining API calls.
+        """
+        self.__buffer_size = buffer_size
+
+        return self
+    
+    def getTCBufferSize(self) -> int:
+        """!
+        @brief Get the buffer size for TC.
+
+        @returns buffer size. in bytes
+        """
+        return self.__buffer_size
 
     def _doCreateGraphs(self, emulator: Emulator):
         graph = self._addGraph('Layer 2 Connections', False)
