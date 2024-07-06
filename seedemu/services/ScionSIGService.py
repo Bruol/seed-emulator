@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict
+from typing import Dict, List
 
 from seedemu.core import Node, Server, Service
 
@@ -97,19 +97,19 @@ class ScionSIGServer(Server):
     
         # provision sig.json
 
-        isd, as_num = config["other_ia"]
-        remote_net = config["remote_net"]
 
         sig_json = {
             "ASes": {
-                f"{isd}-{as_num}": {
-                    "Nets": [
-                        remote_net
-                    ]
-                }
             },
             "ConfigVersion": 9001
         }
+       
+        for (isd, as_, net) in config["other"]:
+            sig_json["ASes"][f"{isd}-{as_}"] = {
+                "Nets": [
+                    net
+                ]
+            }
 
         node.setFile(f"/etc/scion/{sig_name}.json", json.dumps(sig_json, indent=4))
 

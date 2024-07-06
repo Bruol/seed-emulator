@@ -253,26 +253,31 @@ class ScionAutonomousSystem(AutonomousSystem):
                     return False
         return True
 
-    def setSigConfig(self, sig_name: str, node_name: str, other_ia: IA, local_net: str, remote_net: str, ctrl_port: int = 30256, data_port: int = 30056, probe_port: int = 30856, debug_level: str = "debug") -> ScionAutonomousSystem:
+    def setSigConfig(self, sig_name: str, node_name: str, local_net: str, other: List[Tuple[int,int,str]], ctrl_port: int = 30256, data_port: int = 30056, probe_port: int = 30856, debug_level: str = "debug") -> ScionAutonomousSystem:
         """!
         @brief Set the configuration for a SIG.
 
         @param sig_name Name of the SIG.
-        @param other_ia IA of the other AS.
+        @param node_name Name of the node.
+        @param local_net Local network.
+        @param other List of tuples with ISD, ASN, and remote network.
+        @param ctrl_port Control port.
+        @param data_port Data port.
+        @param probe_port Probe port.
+        @param debug_level Debug level.
         """
 
-        assert sig_name not in self.__sigs_config, 'SIG with name {} already has a configuration.'.format(sig_name)
+        assert not self.__sigs_config, 'One SIG was already configured. Currently only one SIG per AS is supported.'
         assert node_name in self.getHosts(), 'Host with name {} does not exist.'.format(node_name)
         assert self._checkPorts(ctrl_port, data_port, probe_port, node_name), 'Ports are already in use.'
 
 
         self.__sigs_config[sig_name] = {
             "local_net": local_net,
-            "remote_net": remote_net,
             "ctrl_port": ctrl_port,
             "data_port": data_port,
             "probe_port": probe_port,
-            "other_ia": other_ia,
+            "other": other,
             "debug_level": debug_level,
             "node_name": node_name
         }
