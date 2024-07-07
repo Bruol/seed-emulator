@@ -2,7 +2,7 @@
 
 from seedemu.compiler import Docker, Graphviz
 from seedemu.core import Emulator, Binding, Filter
-from seedemu.layers import ScionBase, ScionRouting, ScionIsd, Scion, Ospf
+from seedemu.layers import ScionBase, ScionRouting, ScionIsd, Scion, Ospf, Ibgp
 from seedemu.layers.Scion import LinkType as ScLinkType
 from seedemu.services import ScionSIGService
 
@@ -16,6 +16,7 @@ scion_isd = ScionIsd()
 scion = Scion()
 ospf = Ospf()
 sig = ScionSIGService()
+ibgp = Ibgp()
 
 # SCION ISDs
 base.createIsolationDomain(1)
@@ -38,7 +39,7 @@ as150_router.crossConnect(153, 'br0', '10.50.0.2/29')
 # node with node_name has to exist before its possible to create sig config
 as150.createHost("sig0").joinNetwork('net0')
 
-as150.setSigConfig(sig_name="sig0",node_name="sig0",other_ia=(1,153), local_net = "172.16.11.0/24", remote_net = "172.16.12.0/24")
+as150.setSigConfig(sig_name="sig0",node_name="sig0", local_net = "172.16.11.0/24", other = [(1,153,"172.16.12.0/24")])
 config = as150.getSigConfig("sig0")
 
 sig.install("sig150").setConfig("sig0",config)
@@ -56,7 +57,7 @@ as151_router = as151.createRouter('br0').joinNetwork('net0').joinNetwork('ix100'
 as151.createHost("sig").joinNetwork('net0')
 
 # there has to be a host with node name in AS
-as151.setSigConfig(sig_name="sig0",node_name="sig", other_ia=(1,153), local_net = "172.16.14.0/24", remote_net = "172.16.13.0/24")
+as151.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.14.0/24", other = [(1,153,"172.16.12.0/24")])
 
 config = as151.getSigConfig("sig0")
 
@@ -83,15 +84,12 @@ as153_router.crossConnect(150, 'br0', '10.50.0.3/29')
 
 as153.createHost("sig").joinNetwork('net0')
 
-as153.setSigConfig(sig_name="sig0",node_name="sig", other_ia=(1,150), local_net = "172.16.12.0/24", remote_net = "172.16.11.0/24")
-as153.setSigConfig(sig_name="sig1",node_name="sig", other_ia=(1,151), local_net = "172.16.13.0/24", remote_net = "172.16.14.0/24", ctrl_port=30260, data_port=30261, probe_port=30857)
+as153.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.12.0/24", other = [(1,150,"172.16.11.0/24"),(1,151,"172.16.14.0/24")])
 
 config_sig0 = as153.getSigConfig("sig0")
-config_sig1 = as153.getSigConfig("sig1")
 
 
 sig.install("sig153").setConfig(sig_name="sig0",config=config_sig0)
-sig.install("sig153").setConfig(sig_name="sig1",config=config_sig1)
 
 emu.addBinding(Binding('sig153', filter=Filter(nodeName='sig', asn=153)))
 
@@ -111,6 +109,7 @@ emu.addLayer(scion_isd)
 emu.addLayer(scion)
 emu.addLayer(ospf)
 emu.addLayer(sig)
+emu.addLayer(ibgp)
 
 emu.render()
 
