@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 from seedemu.core import AutonomousSystem, InternetExchange, AddressAssignmentConstraint, Node, Graphable, Emulator, Layer
 from typing import Dict, List
@@ -26,8 +27,7 @@ ip -j addr | jq -cr '.[]' | while read -r iface; do {
             ip li set "$ifname" down
             ip li set "$ifname" name "$new_ifname"
             ip li set "$new_ifname" up
-            tc qdisc add dev "$new_ifname" root handle 1:0 tbf rate "${bw}bit" buffer BUFFER_SIZE limit QUEUE_SIZE
-            tc qdisc add dev "$new_ifname" parent 1:0 handle 10: netem delay "${latency}ms" loss "${loss}%"
+            tc qdisc add dev "$new_ifname" root netem rate "${bw}bit" limit QUEUE_SIZE delay "${latency}ms" loss "${loss}%"
         }
     }; done
 }; done
@@ -41,8 +41,7 @@ class Base(Layer, Graphable):
     __ases: Dict[int, AutonomousSystem]
     __ixes: Dict[int, InternetExchange]
 
-    __buffer_size: int = 1000000
-    __queue_size: int = 1000
+    __queue_size: int = 10
             
     __name_servers: List[str]
 
@@ -87,7 +86,7 @@ class Base(Layer, Graphable):
                 ifinfo += '{}:{}:{}:{}:{}\n'.format(net.getName(), net.getPrefix(), l, b, d)
 
             node.setFile('/ifinfo.txt', ifinfo)
-            node.setFile('/interface_setup', BaseFileTemplates['interface_setup_script'].replace("BUFFER_SIZE", str(self.__buffer_size)).replace("QUEUE_SIZE", str(self.__queue_size)))
+            node.setFile('/interface_setup', BaseFileTemplates['interface_setup_script'].replace("QUEUE_SIZE", str(self.__queue_size)))
             node.insertStartCommand(0, '/interface_setup')
             node.insertStartCommand(0, 'chmod +x /interface_setup')
 
@@ -231,24 +230,6 @@ class Base(Layer, Graphable):
         """
         return self.__queue_size
     
-    def setTCBufferSize(self, buffer_size: int) -> Base:
-        """!
-        @brief Set the buffer size for TC.
-
-        @param buffer_size buffer size. in bytes
-        @returns self, for chaining API calls.
-        """
-        self.__buffer_size = buffer_size
-
-        return self
-    
-    def getTCBufferSize(self) -> int:
-        """!
-        @brief Get the buffer size for TC.
-
-        @returns buffer size. in bytes
-        """
-        return self.__buffer_size
 
     def _doCreateGraphs(self, emulator: Emulator):
         graph = self._addGraph('Layer 2 Connections', False)
