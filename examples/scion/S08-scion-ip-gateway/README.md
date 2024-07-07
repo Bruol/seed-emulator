@@ -17,31 +17,28 @@ sig = ScionSIGService()
 Now we can cerate hosts in ASes and install the SIG service. For this we also have to generate a SIG configuration using the setSigConfig() function. in the ScionAutonomosSystem class.
 
 ```python
-# SIG in AS-150
+# node with node_name has to exist before its possible to create sig config
 as150.createHost("sig0").joinNetwork('net0')
 
-as150.setSigConfig(sig_name="sig0",node_name="sig0",other_ia=(1,153), local_net = "172.16.11.0/24", remote_net = "172.16.12.0/24")
+as150.setSigConfig(sig_name="sig0",node_name="sig0", local_net = "172.16.11.0/24", other = [(1,153,"172.16.12.0/24")])
 config = as150.getSigConfig("sig0")
 
 sig.install("sig150").setConfig("sig0",config)
 emu.addBinding(Binding('sig150', filter=Filter(nodeName='sig0', asn=150)))
 ```
-Note that sig_name, node_name, other_ia, local_net, remote_net always have to be set where as the other parameters only need to be set if there are several sigs on the same node
+Note that sig_name, node_name, local_net, other always have to be set where as the other parameters only need to be set if there are several sigs on the same node
 
 Now we can create a SIG client in another AS
 
 ```python
 as153.createHost("sig").joinNetwork('net0')
 
-as153.setSigConfig(sig_name="sig0",node_name="sig", other_ia=(1,150), local_net = "172.16.12.0/24", remote_net = "172.16.11.0/24")
-as153.setSigConfig(sig_name="sig1",node_name="sig", other_ia=(1,151), local_net = "172.16.13.0/24", remote_net = "172.16.14.0/24", ctrl_port=30260, data_port=30261, probe_port=30857)
+as153.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.12.0/24", other = [(1,150,"172.16.11.0/24"),(1,151,"172.16.14.0/24")])
 
 config_sig0 = as153.getSigConfig("sig0")
-config_sig1 = as153.getSigConfig("sig1")
 
 
 sig.install("sig153").setConfig(sig_name="sig0",config=config_sig0)
-sig.install("sig153").setConfig(sig_name="sig1",config=config_sig1)
 
 emu.addBinding(Binding('sig153', filter=Filter(nodeName='sig', asn=153)))
 ```
