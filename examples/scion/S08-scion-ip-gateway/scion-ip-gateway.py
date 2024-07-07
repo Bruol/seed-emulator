@@ -54,16 +54,6 @@ as151.createNetwork('net0')
 as151.createControlService('cs1').joinNetwork('net0')
 as151_router = as151.createRouter('br0').joinNetwork('net0').joinNetwork('ix100')
 
-as151.createHost("sig").joinNetwork('net0')
-
-# there has to be a host with node name in AS
-as151.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.14.0/24", other = [(1,153,"172.16.12.0/24")])
-
-config = as151.getSigConfig("sig0")
-
-
-sig.install("sig151").setConfig("sig0",config)
-emu.addBinding(Binding('sig151', filter=Filter(nodeName='sig', asn=151)))
 
 # AS-152
 as152 = base.createAutonomousSystem(152)
@@ -71,6 +61,17 @@ scion_isd.addIsdAs(1, 152, is_core=True)
 as152.createNetwork('net0')
 as152.createControlService('cs1').joinNetwork('net0')
 as152.createRouter('br0').joinNetwork('net0').joinNetwork('ix100')
+
+as152.createHost("sig").joinNetwork('net0')
+
+# there has to be a host with node name in AS
+as152.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.14.0/24", other = [(1,153,"172.16.12.0/24")])
+
+config = as152.getSigConfig("sig0")
+
+
+sig.install("sig152").setConfig("sig0",config)
+emu.addBinding(Binding('sig152', filter=Filter(nodeName='sig', asn=152)))
 
 # AS-153
 as153 = base.createAutonomousSystem(153)
@@ -84,7 +85,7 @@ as153_router.crossConnect(150, 'br0', '10.50.0.3/29')
 
 as153.createHost("sig").joinNetwork('net0')
 
-as153.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.12.0/24", other = [(1,150,"172.16.11.0/24"),(1,151,"172.16.14.0/24")])
+as153.setSigConfig(sig_name="sig0",node_name="sig", local_net = "172.16.12.0/24", other = [(1,150,"172.16.11.0/24"),(1,152,"172.16.14.0/24")])
 
 config_sig0 = as153.getSigConfig("sig0")
 
