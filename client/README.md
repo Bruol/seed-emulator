@@ -14,6 +14,7 @@ What's working:
     - animate packet flows with BPF expression.
     - disconnect/reconnect nodes from emulation.
     - enable/disable bgp peers.
+    - set link properties when selecting a network.
 
 How to use:
 
@@ -22,6 +23,8 @@ How to use:
 3. visit [http://localhost:8080/](http://localhost:8080/) for list, and [http://localhost:8080/map.html](http://localhost:8080/map.html) for map.
 
 Alternatively, set `clientEnabled = True` when using `Docker` compiler. Note that `seedemu-client` allows unauthenticated console access to all nodes, which can potentially allow root access to your emulator host. Only run `seedemu-client` on trusted networks.
+
+You can also set the `internetMapClientImage` parameter in the `Docker` compiler to use a custom image.
 
 Note on the map:
 

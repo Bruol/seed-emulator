@@ -1,5 +1,5 @@
 import { EdgeOptions, NodeOptions } from 'vis-network';
-import { BgpPeer, EmulatorNetwork, EmulatorNode } from '../common/types';
+import { BgpPeer, EmulatorNetwork, EmulatorNode, NetworkLinkProperties } from '../common/types';
 
 export type DataEvent = 'packet' | 'dead';
 
@@ -207,6 +207,27 @@ export class DataSource {
     async setNetworkStatus(node: string, up: boolean) {
         await this._load('POST', `${this._apiBase}/container/${node}/net`, JSON.stringify({ status: up }));
     }
+
+    /**
+     * get Network Link Properties
+     * 
+     * @param net network id.
+     * @returns network link properties.
+     */
+    async getNetworkLinkProperties(net: string): Promise<NetworkLinkProperties> {
+        return (await this._load<NetworkLinkProperties>('GET', `${this._apiBase}/network/${net}/tc`)).result;
+    }
+
+    /**
+     * set Network Link Properties
+     * 
+     * @param net network id.
+     * @param properties network link properties.
+     */
+    async setNetworkLinkProperties(net: string, properties: NetworkLinkProperties) {
+        await this._load('POST', `${this._apiBase}/network/${net}/tc`, JSON.stringify(properties));
+    }
+
 
     /**
      * event handler register.

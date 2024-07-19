@@ -245,3 +245,17 @@ label {
 #current-multiplier::after {
     content: 'x';
 }
+
+.property-input {
+    width: 10em;
+    padding-left: 10px;
+    margin-right: 10px;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 1px;
+}
+
+.submit-button {
+    font-size: 1.2em;
+}

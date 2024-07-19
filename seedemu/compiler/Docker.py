@@ -331,6 +331,7 @@ class Docker(Compiler):
         dummyNetworksMask: int = 24,
         internetMapEnabled: bool = True,
         internetMapPort: int = 8080,
+        internetMapClientImage: str = SEEDEMU_INTERNET_MAP_IMAGE,
         etherViewEnabled: bool = False,
         etherViewPort: int = 5000,
         clientHideServiceNet: bool = True
@@ -376,6 +377,7 @@ class Docker(Compiler):
 
         self.__internet_map_enabled = internetMapEnabled
         self.__internet_map_port = internetMapPort
+        self.__internet_map_client_image = internetMapClientImage
 
         self.__ether_view_enabled = etherViewEnabled
         self.__ether_view_port = etherViewPort
@@ -1067,7 +1069,7 @@ class Docker(Compiler):
             self._log('enabling seedemu-internet-map...')
 
             self.__services += DockerCompilerFileTemplates['seedemu_internet_map'].format(
-                clientImage = SEEDEMU_INTERNET_MAP_IMAGE,
+                clientImage = self.__internet_map_client_image,
                 clientPort = self.__internet_map_port
             )
 

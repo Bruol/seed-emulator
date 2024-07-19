@@ -276,4 +276,179 @@ router.post('/container/:id/bgp/:peer', express.json(), async function (req, res
     next();
 });
 
+
+function parseRate(rate: string, metric: string): string {
+    let result = rate;
+
+    if (metric == 'Kbit') {
+        result = (parseInt(rate) * 1000).toString();
+    }
+    else if (metric == 'Mbit') {
+        result = (parseInt(rate) * 1000000).toString();
+    }  
+    else if (metric == 'Gbit') {
+        result = (parseInt(rate) * 1000000000).toString();
+    }
+    else if (metric == 'Tbit') {
+        result = (parseInt(rate) * 1000000000000).toString();
+    }
+    return result;
+}
+
+router.get('/network/:id/tc',  async function(req, res, next) {
+    // get container attached to network
+    var containers = await docker.listContainers();
+    var container = containers.find(c => {
+        const nets = c.NetworkSettings.Networks;
+        return Object.keys(nets).some(n => nets[n].NetworkID.startsWith(req.params.id));
+    });
+
+
+    var net = (await docker.listNetworks()).filter(n => n.Id.startsWith(req.params.id))[0];
+    var ifname = net.Labels['org.seedsecuritylabs.seedemu.meta.name'];
+    
+    // exectue tc qdisc show dev $id
+    const exec = await docker.getContainer(container.Id).exec({
+        Cmd: ['tc', 'qdisc', 'show', 'dev', ifname],
+        AttachStdout: true,
+        AttachStderr: true
+    });
+
+    const stream = await exec.start({ hijack: true, stdin: true });
+
+    let result = '';
+    stream.on('data', (data) => {
+        result += data.toString();
+    });
+
+    await new Promise((resolve, reject) => {
+        stream.on('end', resolve);
+        stream.on('error', reject);
+    });
+
+    // parse the result
+    // Format: qdisc netem 803a: dev $ifname root refcnt 5 limit 100 delay 100.0ms loss 5% rate 1Tbit
+
+    // use regex to extract the limit
+    const limit = result.match(/limit (\d+) /)?.[1];
+
+    const latencyMatch = result.match(/delay (\d+)(?:\.(\d+))?(ms|us|ns|s)/);
+    let latency;
+    if (latencyMatch) {
+        let value = parseFloat(`${latencyMatch[1]}${latencyMatch[2] ? '.' + latencyMatch[2] : ''}`);
+        let unit = latencyMatch[3];
+        switch (unit) {
+            case 'us':
+                value /= 1000;
+                break;
+            case 'ns':
+                value /= 1000000;
+                break;
+            case 's':
+                value *= 1000;
+                break;
+        }
+        latency = value;
+    }
+
+    
+    
+    const loss = result.match(/loss (\d+)%/)?.[1];    
+
+    // rate is in bit/s
+    let rate = result.match(/rate (\d+)(bit|Mbit|Kbit|Gbit|Tbit)/)?.[1];
+    // convert rate to bit/s
+    const metric = result.match(/rate (\d+)(bit|Mbit|Kbit|Gbit|Tbit)/)?.[2];
+
+    rate = parseRate(rate, metric);
+
+
+
+    const parsed_result = {
+        queue: limit,
+        latency,
+        loss,
+        bw: rate
+    }
+
+    // return the result
+    res.json({
+        ok: true,
+        result: parsed_result
+    });
+    next();
+});
+
+router.post('/network/:id/tc', express.json(), async function(req, res, next) {
+    const { bw, latency, loss, queue } = req.body;
+
+    // get network by id
+    var net = (await docker.listNetworks()).filter(n => n.Id.startsWith(req.params.id))[0];
+    var ifname = net.Labels['org.seedsecuritylabs.seedemu.meta.name'];
+    
+    // get containers attached to the network
+    var containers = (await docker.listContainers()).filter(c => {
+        const nets = c.NetworkSettings.Networks;
+        return Object.keys(nets).some(n => nets[n].NetworkID.startsWith(req.params.id));
+    });
+
+    // execute tc command on each container
+    
+    const cmd = ['tc', 'qdisc', 'replace', 'dev', ifname, 'root', 'netem'];
+    
+    // if value is -, dont put it in the command
+    if (bw === '-1' && latency === '-1' && loss === '-1' && queue === '-1') {
+        res.json({
+            ok: true,
+            result: 'no change'
+        });
+        next();
+        return;
+    }
+
+    if (bw != '-1') {
+        cmd.push('rate', `${bw}bit`);
+    }
+    if (latency != '-1') {
+        cmd.push('latency', `${latency}ms`);
+    }
+    if (loss != '-1') {
+        cmd.push('loss', `${loss}%`);
+    }
+    if (queue != '-1') {
+        cmd.push('limit', `${queue}`);
+    }
+
+
+    let results = [];
+
+    for (let container of containers) {
+        const exec = await docker.getContainer(container.Id).exec({
+            Cmd: cmd,
+            AttachStdout: true,
+            AttachStderr: true
+        });
+
+        const stream = await exec.start({ hijack: true, stdin: true });
+
+        let result = '';
+        stream.on('data', (data) => {
+            result += data.toString();
+        });
+
+        await new Promise((resolve, reject) => {
+            stream.on('end', resolve);
+            stream.on('error', reject);
+        });
+
+        results.push(result);
+    }
+
+    res.json({
+        ok: true,
+        result: results
+    });
+    next();
+});
+
 export = router;

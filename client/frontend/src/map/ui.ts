@@ -887,6 +887,129 @@ export class MapUi {
             infoPlate.appendChild(this._createInfoPlateValuePair('Scope', net.meta.emulatorInfo.scope));
             infoPlate.appendChild(this._createInfoPlateValuePair('Type', net.meta.emulatorInfo.type));
             infoPlate.appendChild(this._createInfoPlateValuePair('Prefix', net.meta.emulatorInfo.prefix));
+
+
+            let linkProps = document.createElement('div');
+            linkProps.classList.add('section')
+
+            let linkPropsTitle = document.createElement('div');
+            linkPropsTitle.className = 'title';
+            linkPropsTitle.innerText = 'Link properties';
+
+            linkProps.appendChild(linkPropsTitle);
+
+            const linkProperties = await this._datasource.getNetworkLinkProperties(net.Id.substr(0, 12));
+
+
+            let bwContainer = document.createElement('div');
+
+            let bwTitle = document.createElement('span');
+            bwTitle.className = 'label';
+            bwTitle.innerText = 'Bandwidth';
+
+            let bwValue = document.createElement('input');
+            bwValue.type = 'number';
+            bwValue.className = 'property-input';
+            bwValue.value = linkProperties.bw || '-1';
+
+            let bwUnit = document.createElement('span');
+            bwUnit.className = 'text';
+            bwUnit.innerText = 'bps';
+
+            bwContainer.appendChild(bwTitle);
+            bwContainer.appendChild(bwValue);
+            bwContainer.appendChild(bwUnit);
+
+            let latencyContainer = document.createElement('div');
+
+            let latencyTitle = document.createElement('span');
+            latencyTitle.className = 'label';
+            latencyTitle.innerText = 'Latency';
+
+            let latencyValue = document.createElement('input');
+            latencyValue.type = 'number';
+            latencyValue.className = 'property-input';
+            latencyValue.value = linkProperties.latency || '-1';
+
+            let latencyUnit = document.createElement('span');
+            latencyUnit.className = 'text';
+            latencyUnit.innerText = 'ms';
+
+            latencyContainer.appendChild(latencyTitle);
+            latencyContainer.appendChild(latencyValue);
+            latencyContainer.appendChild(latencyUnit);
+
+            let lossContainer = document.createElement('div');
+
+            let lossTitle = document.createElement('span');
+            lossTitle.className = 'label';
+            lossTitle.innerText = 'Loss';
+            
+            let lossValue = document.createElement('input');
+            lossValue.type = 'number';
+            lossValue.className = 'property-input';
+            lossValue.value = linkProperties.loss || '-1';
+
+            let lossUnit = document.createElement('span');
+            lossUnit.className = 'text';
+            lossUnit.innerText = '%';
+
+            lossContainer.appendChild(lossTitle);
+            lossContainer.appendChild(lossValue);
+            lossContainer.appendChild(lossUnit);
+
+            let queueContainer = document.createElement('div');
+
+            let queueTitle = document.createElement('span');
+            queueTitle.className = 'label';
+            queueTitle.innerText = 'Queue';
+
+            let queueValue = document.createElement('input');
+            queueValue.type = 'number';
+            queueValue.className = 'property-input';
+            queueValue.value = linkProperties.queue || '-1';
+
+            let queueUnit = document.createElement('span');
+            queueUnit.className = 'text';
+            queueUnit.innerText = 'packets';
+
+            queueContainer.appendChild(queueTitle);
+            queueContainer.appendChild(queueValue);
+            queueContainer.appendChild(queueUnit);
+            
+
+            let submitButton = document.createElement('a');
+            
+            submitButton.href = '#';
+            submitButton.classList.add('submit-button');
+            submitButton.innerText = 'Submit Link Properties';
+            submitButton.onclick = async () => {
+
+                await this._datasource.setNetworkLinkProperties(net.Id.substr(0, 12), {
+                    bw: bwValue.value   ,
+                    latency: latencyValue.value,
+                    loss: lossValue.value,
+                    queue: queueValue.value
+                });
+                this._infoPlateElement.classList.add('loading');
+                window.setTimeout(() => {
+                    this._updateInfoPlateWith(nodeId);
+                }, 100);
+            };
+
+
+
+            
+            linkProps.appendChild(bwContainer);
+            linkProps.appendChild(latencyContainer);
+            linkProps.appendChild(lossContainer);
+            linkProps.appendChild(queueContainer);
+            linkProps.appendChild(submitButton);
+            
+            
+            linkProps.appendChild(submitButton);
+            
+            infoPlate.appendChild(linkProps);
         }
 
         if (vertex.type == 'node') {

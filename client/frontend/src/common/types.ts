@@ -43,3 +43,10 @@ export interface BgpPeer {
     protocolState: string;
     bgpState: string;
 };
+
+export interface NetworkLinkProperties {
+    queue: string;
+    bw: string;
+    latency: string;
+    loss: string;
+}
