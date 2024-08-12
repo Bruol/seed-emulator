@@ -79,7 +79,7 @@ class ScionRouting(Routing):
         super().configure(emulator)
 
         reg = emulator.getRegistry()
-        for ((scope, type, name), obj) in reg.getAll().items():
+        for ((_, type, name), obj) in reg.getAll().items():
             if type == 'rnode':
                 rnode: ScionRouter = obj
                 if not issubclass(rnode.__class__, ScionRouter):
@@ -131,7 +131,7 @@ class ScionRouting(Routing):
         isd_layer: ScionIsd = reg.get('seedemu', 'layer', 'ScionIsd')
 
         reg = emulator.getRegistry()
-        for ((scope, type, name), obj) in reg.getAll().items():
+        for ((_, type, _), obj) in reg.getAll().items():
             if type in ['rnode', 'csnode', 'hnode']:
                 node: Node = obj
                 asn = obj.getAsn()
@@ -152,7 +152,7 @@ class ScionRouting(Routing):
                 csnode: Node = obj
                 self._provision_cs_config(csnode, as_)
                 if as_.getGenerateStaticInfoConfig():
-                    self._provision_staticInfo_config(csnode, as_) # provision staticInfoConfig.json
+                    self._provision_static_info_config(csnode, as_) # provision staticInfoConfig.json
 
     @staticmethod
     def __provision_base_config(node: Node):
@@ -297,7 +297,7 @@ class ScionRouting(Routing):
                 return lat,bw,pd,mtu
 
     @staticmethod
-    def _provision_staticInfo_config(node: Node, as_: ScionAutonomousSystem):
+    def _provision_static_info_config(node: Node, as_: ScionAutonomousSystem):
         """
         Set staticInfo configuration.
 
@@ -319,21 +319,26 @@ class ScionRouting(Routing):
             ifs = ScionRouting._get_internal_link_properties(interface, as_)
             xc_linkprops = ScionRouting._get_xc_link_properties(interface, as_)
             if xc_linkprops:
-                lat,bw,pd,mtu = xc_linkprops
+                lat,bw,_,_ = xc_linkprops
             else: # interface is not part of a cross connect thus it must be in an internet exchange
-                lat,bw,pd,mtu = ScionRouting._get_ix_link_properties(interface, as_)
+                lat,bw,_,_ = ScionRouting._get_ix_link_properties(interface, as_)
             
 
             # Add Latency
             if lat != 0: # if latency is not 0, add it
                 if not staticInfo["Latency"]: # if no latencies have been added yet empty dict
                     staticInfo["Latency"][str(interface)] = {}
-                staticInfo["Latency"][str(interface)]["Inter"] = str(lat)+"ms"
+                if str(interface) not in staticInfo["Latency"]:
+                    staticInfo["Latency"][str(interface)] = {}
+                staticInfo["Latency"][str(interface)]["Inter"] = str(2*lat)+"ms" # each end adds lat ms to the total latency
             for _if in ifs["Latency"]: # add intra latency
                 if ifs["Latency"][_if] != "0ms": # omit 0ms latency
-                    if not staticInfo["Latency"][str(interface)]["Intra"]: # if no intra latencies have been added yet empty dict
+                    if str(interface) not in staticInfo["Latency"]: # if no intra latencies have been added yet empty dict
+                        staticInfo["Latency"][str(interface)] = {}
+                    if "Intra" not in staticInfo["Latency"][str(interface)]:
                         staticInfo["Latency"][str(interface)]["Intra"] = {}
-                    staticInfo["Latency"][str(interface)]["Intra"][str(_if)] = ifs["Latency"][_if]
+                    lat = int(ifs["Latency"][_if].split('ms')[0])
+                    staticInfo["Latency"][str(interface)]["Intra"][str(_if)] = str(2*lat)+"ms"
             
             
             
@@ -341,8 +346,12 @@ class ScionRouting(Routing):
             if bw != 0: # if bandwidth is not 0, add it
                 if not staticInfo["Bandwidth"]: # if no bandwidths have been added yet empty dict
                     staticInfo["Bandwidth"][str(interface)] = {}
+                if str(interface) not in staticInfo["Bandwidth"]:
+                    staticInfo["Bandwidth"][str(interface)] = {} 
                 staticInfo["Bandwidth"][str(interface)]["Inter"] = int(bw/1000) # convert bps to kbps
             if ifs["Bandwidth"]: # add intra bandwidth
+                if str(interface) not in staticInfo["Bandwidth"]:
+                    staticInfo["Bandwidth"][str(interface)] = {}
                 staticInfo["Bandwidth"][str(interface)]["Intra"] = ifs["Bandwidth"]
 
             # Add LinkType

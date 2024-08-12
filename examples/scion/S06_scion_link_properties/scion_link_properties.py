@@ -22,13 +22,13 @@ as110 = base.createAutonomousSystem(110)
 as110.setNote('This is a core AS')
 as110.setGenerateStaticInfoConfig(True) # Generate static info config
 scion_isd.addIsdAs(1,110,is_core=True)
-as110.createNetwork('net0').setDefaultLinkProperties(latency=10, bandwidth=1000, packetDrop=0.1).setMtu(1400)
+as110.createNetwork('net0').setDefaultLinkProperties(latency=10, bandwidth=1000000, packetDrop=0.1).setMtu(1400)
 as110.createControlService('cs_1').joinNetwork('net0')
 as_110_br1 = as110.createRouter('br1').joinNetwork('net0').setGeo(Lat=37.7749, Long=-122.4194,Address="San Francisco, CA, USA").setNote("This is a border router")
 as_110_br1.crossConnect(111,'br1','10.3.0.2/29',latency=0,bandwidth=0,packetDrop=0,MTU=1280)
 as_110_br2 = as110.createRouter('br2').joinNetwork('net0')
-as_110_br2.crossConnect(112,'br1','10.3.0.10/29',latency=30,bandwidth=500,packetDrop=0.1,MTU=1100)
-as_110_br2.crossConnect(111,'br1','10.3.0.16/29')
+as_110_br2.crossConnect(112,'br1','10.3.0.10/29',latency=30,bandwidth=5000000,packetDrop=0.1,MTU=1100)
+as_110_br2.crossConnect(111,'br1','10.3.0.20/29')
 
 # AS-111
 as111 = base.createAutonomousSystem(111)
@@ -38,7 +38,7 @@ as111.createNetwork('net0').setDefaultLinkProperties(latency=0, bandwidth=0, pac
 as111.createControlService('cs_1').joinNetwork('net0')
 as_111_br1 = as111.createRouter('br1').joinNetwork('net0')
 as_111_br1.crossConnect(110,'br1','10.3.0.3/29',latency=0,bandwidth=0,packetDrop=0,MTU=1280)
-as_111_br1.crossConnect(110,'br2','10.3.0.17/29')
+as_111_br1.crossConnect(110,'br2','10.3.0.21/29')
 
 # AS-112
 as112 = base.createAutonomousSystem(112)
@@ -47,7 +47,7 @@ scion_isd.setCertIssuer((1,112),issuer=110)
 as112.createNetwork('net0').setDefaultLinkProperties(latency=0, bandwidth=0, packetDrop=0)
 as112.createControlService('cs_1').joinNetwork('net0')
 as_112_br1 = as112.createRouter('br1').joinNetwork('net0')
-as_112_br1.crossConnect(110,'br2','10.3.0.11/29',latency=30,bandwidth=500,packetDrop=0.1,MTU=1100)
+as_112_br1.crossConnect(110,'br2','10.3.0.11/29',latency=30,bandwidth=5000000,packetDrop=0.1,MTU=1100)
 
 
 # Inter-AS routing
@@ -64,4 +64,4 @@ emu.addLayer(scion)
 emu.render()
 
 # Compilation
-emu.compile(Docker(), './output')
+emu.compile(Docker(internetMapEnabled=True), './output', override=True)
