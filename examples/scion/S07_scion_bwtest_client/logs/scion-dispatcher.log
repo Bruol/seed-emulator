@@ -1,0 +1,21 @@
+2024-08-12 09:56:19.072738+0000	INFO	             env/logging.go:42	=====================> Service started SCION Dispatcher scion-dispatcher
+  Scion version: v0.11.0-20-g469b21fbb-scionlab
+
+  pid:           69
+  euid/egid:     0 0
+  cmd line:      ["scion-dispatcher" "--config" "/etc/scion/dispatcher.toml"]
+
+2024-08-12 11:45:33.513119+0000	INFO	             env/logging.go:42	=====================> Service started SCION Dispatcher scion-dispatcher
+  Scion version: v0.11.0-20-g469b21fbb-scionlab
+
+  pid:           69
+  euid/egid:     0 0
+  cmd line:      ["scion-dispatcher" "--config" "/etc/scion/dispatcher.toml"]
+
+2024-08-12 13:39:03.743347+0000	INFO	             env/logging.go:42	=====================> Service started SCION Dispatcher scion-dispatcher
+  Scion version: v0.11.0-20-g469b21fbb-scionlab
+
+  pid:           68
+  euid/egid:     0 0
+  cmd line:      ["scion-dispatcher" "--config" "/etc/scion/dispatcher.toml"]
+

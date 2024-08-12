@@ -1,0 +1,15 @@
+
+Test parameters:
+client->server: 3 seconds, 1000 bytes, 30 packets
+server->client: 3 seconds, 1000 bytes, 30 packets
+Fatal: binding to port range {end=0; start=1024}: address already in use
+
+Test parameters:
+client->server: 3 seconds, 1000 bytes, 30 packets
+server->client: 3 seconds, 1000 bytes, 30 packets
+Fatal: binding to port range {end=0; start=1024}: address already in use
+
+Test parameters:
+client->server: 3 seconds, 1000 bytes, 30 packets
+server->client: 3 seconds, 1000 bytes, 30 packets
+Fatal: binding to port range {end=0; start=1024}: address already in use

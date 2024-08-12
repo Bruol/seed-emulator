@@ -1,7 +1,7 @@
 
 from seedemu.compiler import Docker
 from seedemu.core import Emulator
-from seedemu.layers import ScionBase, ScionRouting, ScionIsd, Scion
+from seedemu.layers import ScionBase, ScionRouting, ScionIsd, Scion, Ospf
 from seedemu.layers.Scion import LinkType as ScLinkType
 
 # Initialize
@@ -10,6 +10,7 @@ base = ScionBase()
 routing = ScionRouting()
 scion_isd = ScionIsd()
 scion = Scion()
+ospf = Ospf()
 
 # Create ISDs
 base.createIsolationDomain(1)
@@ -60,6 +61,7 @@ emu.addLayer(base)
 emu.addLayer(routing)
 emu.addLayer(scion_isd)
 emu.addLayer(scion)
+emu.addLayer(ospf)
 
 emu.render()
 
