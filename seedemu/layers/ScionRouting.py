@@ -43,6 +43,7 @@ connection = "/cache/{name}.beacon.db"
 _Templates["dispatcher"] = """\
 [dispatcher]
 id = "dispatcher"
+local_udp_forwarding = true
 
 """
 
@@ -50,10 +51,7 @@ _CommandTemplates: Dict[str, str] = {}
 
 _CommandTemplates["br"] = "scion-border-router --config /etc/scion/{name}.toml >> /var/log/scion-border-router.log 2>&1"
 
-_CommandTemplates["cs"] = """\
-bash -c 'until [ -e /run/shm/dispatcher/default.sock ]; do sleep 1; done;\
-scion-control-service --config /etc/scion/{name}.toml >> /var/log/scion-control-service.log 2>&1'\
-"""
+_CommandTemplates["cs"] = "scion-control-service --config /etc/scion/{name}.toml >> /var/log/scion-control-service.log 2>&1"
 
 _CommandTemplates["disp"] = "scion-dispatcher --config /etc/scion/dispatcher.toml >> /var/log/scion-dispatcher.log 2>&1"
 

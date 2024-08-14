@@ -210,6 +210,8 @@ class ScionAutonomousSystem(AutonomousSystem):
             'attributes': self.getAsAttributes(isd),
             'isd_as': f'{isd}-{self.getAsn()}',
             'mtu': self.__mtu,
+            "test_dispatcher": True,
+            "dispatched_ports": "30000-32767",
             'control_service': control_services,
             'discovery_service': control_services,
             'border_routers': border_routers,

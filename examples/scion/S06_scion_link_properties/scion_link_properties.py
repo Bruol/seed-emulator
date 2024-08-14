@@ -66,4 +66,4 @@ emu.addLayer(ospf)
 emu.render()
 
 # Compilation
-emu.compile(Docker(internetMapEnabled=True), './output', override=True)
+emu.compile(Docker(internetMapEnabled=True, internetMapClientImage="bruol0/seedemu-client"), './output', override=True)
