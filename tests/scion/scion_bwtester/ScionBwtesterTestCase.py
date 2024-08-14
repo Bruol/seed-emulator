@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import time
-import unittest as 
+import unittest as ut
 from tests.scion import ScionTestCase
 
 class ScionBwtesterTestCase(ScionTestCase):
@@ -12,8 +12,8 @@ class ScionBwtesterTestCase(ScionTestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.wait_until_all_containers_up(13)
-        cls.printLog("Wait 10 seconds for beaconing")
-        time.sleep(10)
+        cls.printLog("Wait 60 seconds for beaconing")
+        time.sleep(60)
 
     def setUp(self):
         super().setUp()
@@ -26,6 +26,7 @@ class ScionBwtesterTestCase(ScionTestCase):
 
     def bwtester_conn_test(self, container, server: str) -> bool:
         ec, output = container.exec_run(f"scion-bwtestclient -s {server}:40002")
+        self.printLog(f"CMD: scion-bwtestclient -s {server}:40002")
         self.printLog(output.decode())
         return ec == 0
 
