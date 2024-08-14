@@ -16,7 +16,7 @@ ospf = Ospf()
 base.createIsolationDomain(1)
 
 
-# Ases 
+# Ases
 
 # AS-110
 as110 = base.createAutonomousSystem(110)

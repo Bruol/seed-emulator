@@ -397,7 +397,7 @@ router.post('/network/:id/tc', express.json(), async function(req, res, next) {
     const cmd = ['tc', 'qdisc', 'replace', 'dev', ifname, 'root', 'netem'];
     
     // if value is -, dont put it in the command
-    if (bw === '-1' && latency === '-1' && loss === '-1' && queue === '-1') {
+    if (bw === '0' && latency === '0' && loss === '0' && queue === '0') {
         res.json({
             ok: true,
             result: 'no change'
@@ -406,16 +406,16 @@ router.post('/network/:id/tc', express.json(), async function(req, res, next) {
         return;
     }
 
-    if (bw != '-1') {
+    if (bw != '0') {
         cmd.push('rate', `${bw}bit`);
     }
-    if (latency != '-1') {
+    if (latency != '0') {
         cmd.push('latency', `${latency}ms`);
     }
-    if (loss != '-1') {
+    if (loss != '0') {
         cmd.push('loss', `${loss}%`);
     }
-    if (queue != '-1') {
+    if (queue != '0') {
         cmd.push('limit', `${queue}`);
     }
 

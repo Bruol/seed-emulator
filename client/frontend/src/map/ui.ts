@@ -889,6 +889,8 @@ export class MapUi {
             infoPlate.appendChild(this._createInfoPlateValuePair('Prefix', net.meta.emulatorInfo.prefix));
 
 
+
+
             let linkProps = document.createElement('div');
             linkProps.classList.add('section')
 
@@ -908,9 +910,33 @@ export class MapUi {
             bwTitle.innerText = 'Bandwidth';
 
             let bwValue = document.createElement('input');
-            bwValue.type = 'number';
+            bwValue.type = 'text';
             bwValue.className = 'property-input';
-            bwValue.value = linkProperties.bw || '-1';
+            bwValue.value = linkProperties.bw || '0';
+
+            
+
+            const parseBW = () => {
+                
+                let input = bwValue.value;
+                // Remove all non-numeric characters except dots
+                input = input.replace(/[^0-9.]/g, '');
+                // Split the input into integer and decimal parts
+                let [integerPart, decimalPart] = input.split('.');
+                
+                // Format integer part with commas
+                if (integerPart) {
+                  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+                
+                // Combine integer and decimal parts
+                let formattedNumber = decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
+                bwValue.value = formattedNumber;
+            }
+            
+            parseBW();
+
+            bwValue.onchange = parseBW;
 
             let bwUnit = document.createElement('span');
             bwUnit.className = 'text';
@@ -929,7 +955,7 @@ export class MapUi {
             let latencyValue = document.createElement('input');
             latencyValue.type = 'number';
             latencyValue.className = 'property-input';
-            latencyValue.value = linkProperties.latency || '-1';
+            latencyValue.value = linkProperties.latency || '0';
 
             let latencyUnit = document.createElement('span');
             latencyUnit.className = 'text';
@@ -948,7 +974,7 @@ export class MapUi {
             let lossValue = document.createElement('input');
             lossValue.type = 'number';
             lossValue.className = 'property-input';
-            lossValue.value = linkProperties.loss || '-1';
+            lossValue.value = linkProperties.loss || '0';
 
             let lossUnit = document.createElement('span');
             lossUnit.className = 'text';
@@ -967,7 +993,7 @@ export class MapUi {
             let queueValue = document.createElement('input');
             queueValue.type = 'number';
             queueValue.className = 'property-input';
-            queueValue.value = linkProperties.queue || '-1';
+            queueValue.value = linkProperties.queue || '0';
 
             let queueUnit = document.createElement('span');
             queueUnit.className = 'text';
@@ -985,8 +1011,15 @@ export class MapUi {
             submitButton.innerText = 'Submit Link Properties';
             submitButton.onclick = async () => {
 
+                let bw = parseInt(bwValue.value.replace(/,/g, ''));
+
+                if (isNaN(bw) || bw < 0) {
+                    bw = 0;
+                }
+
+                
                 await this._datasource.setNetworkLinkProperties(net.Id.substr(0, 12), {
-                    bw: bwValue.value   ,
+                    bw: bw.toString(),
                     latency: latencyValue.value,
                     loss: lossValue.value,
                     queue: queueValue.value
