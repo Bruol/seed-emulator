@@ -66,4 +66,5 @@ emu.addLayer(ospf)
 emu.render()
 
 # Compilation
+# in order to dynamically change link properties you have to use this custom image of the seedemu-client because this has not been merged into the master branch yet
 emu.compile(Docker(internetMapEnabled=True, internetMapClientImage="bruol0/seedemu-client"), './output', override=True)
